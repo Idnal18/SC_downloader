@@ -7,6 +7,8 @@ from Src.Util.console import console
 # General import
 import requests, sys, json
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 def domain_version():
     console.print("[green]Get rules ...")
@@ -28,6 +30,19 @@ def domain_version():
         site_url = f"https://{domain}"
         try:
             session = requests.Session()
+
+            # Retry transient failures (dead keep-alive connections after long
+            # idle periods between downloads, rate limits, transient 5xx)
+            retry_strategy = Retry(
+                total=3,
+                backoff_factor=1,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=["GET", "POST"]
+            )
+            adapter = HTTPAdapter(max_retries=retry_strategy)
+            session.mount("https://", adapter)
+            session.mount("http://", adapter)
+
             site_request = session.get(site_url, headers={'user-agent': get_headers()})
             soup = BeautifulSoup(site_request.text, "lxml")
             version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']

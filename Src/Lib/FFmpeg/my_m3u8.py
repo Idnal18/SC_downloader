@@ -15,7 +15,7 @@ from tqdm import TqdmExperimentalWarning
 warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
-MAX_WORKER = 20
+MAX_WORKER = 15
 DONWLOAD_SUB = True
 DOWNLOAD_DEFAULT_LANGUAGE = False
 SEGMENT_MAX_RETRY = 5
