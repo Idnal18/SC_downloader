@@ -20,34 +20,57 @@ def domain_version():
 
     while True:
         if not domain:
-            domain = input("Insert domain (streamingcommunity.?): ")
+            domain = input("Insert full domain (e.g. streamingcommunityz.pizza): ")
             req_repo['domain'] = domain
             with open('data.json', 'w') as file:
                 json.dump(req_repo, file)
         console.print(f"[blue]Test domain [white]=> [red]{domain}")
-        site_url = f"https://streamingcommunity.{domain}"
+        site_url = f"https://{domain}"
         try:
-            site_request = requests.get(site_url, headers={'user-agent': get_headers()})
+            session = requests.Session()
+            site_request = session.get(site_url, headers={'user-agent': get_headers()})
             soup = BeautifulSoup(site_request.text, "lxml")
             version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
-            console.print(f"[blue]Rules [white]=> [red].{domain}")
-            return domain, version
-        
+            console.print(f"[blue]Rules [white]=> [red]{domain}")
+            return domain, version, session
+
         except Exception as e:
             console.log("[red]Cant get version, problem with domain. Try again.")
             domain = None
             continue
 
-def search(title_search, domain):
+def search(title_search, domain, version, session):
 
-    req = requests.get(f"https://streamingcommunity.{domain}/api/search?q={title_search}", headers={'user-agent': get_headers()})
+    xsrf = requests.utils.unquote(session.cookies.get('XSRF-TOKEN', ''))
+    headers = {
+        'user-agent': get_headers(),
+        'X-Inertia': 'true',
+        'X-Inertia-Version': version,
+        'X-XSRF-TOKEN': xsrf,
+        'Accept': 'application/json, text/plain, */*',
+        'Referer': f'https://{domain}',
+    }
+
+    req = session.get(f"https://{domain}/it/search?q={title_search}", headers=headers)
 
     if req.ok:
-        return [{'name': title['name'], 'type': title['type'], 'id': title['id'], 'slug': title['slug']} for title in req.json()['data']][0:21]
+        results = []
+        for title in req.json()['data']:
+            release_date = title.get('last_air_date')
+            year = release_date.split('-')[0] if release_date else None
+            results.append({
+                'name': title['name'],
+                'type': title['type'],
+                'id': title['id'],
+                'slug': title['slug'],
+                'year': year
+            })
+        return results[0:21]
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
 def display_search_results(db_title):
     for i, title in enumerate(db_title):
-        console.print(f"[yellow]{i} [white]-> [green]{title['name']} [white]- [cyan]{title['type']}")
+        year = f" ({title['year']})" if title.get('year') else ""
+        console.print(f"[yellow]{i} [white]-> [green]{title['name']}{year} [white]- [cyan]{title['type']}")

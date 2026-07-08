@@ -7,7 +7,7 @@ from Src.Api.tv import main_dw_tv as download_tv
 from Src.Util.message import msg_start
 from Src.Util.console import console, msg
 from Src.Util.os import remove_folder
-from Src.Upload.update import main_update
+# from Src.Upload.update import main_update
 from Src.Lib.FFmpeg.installer import check_ffmpeg
 
 # Import
@@ -23,10 +23,10 @@ def initialize():
     remove_folder("tmp")
     msg_start()
 
-    try:
-        main_update()
-    except Exception as e:
-        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
+    # try:
+    #     main_update()
+    # except Exception as e:
+    #     console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
 
     check_ffmpeg()
     print("\n")
@@ -34,10 +34,10 @@ def initialize():
 def main():
 
     initialize()
-    domain, site_version = Page.domain_version()
+    domain, site_version, session = Page.domain_version()
 
     film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
-    db_title = Page.search(film_search, domain)
+    db_title = Page.search(film_search, domain, site_version, session)
     Page.display_search_results(db_title)
 
     if len(db_title) != 0:
@@ -54,10 +54,10 @@ def main():
 
                 if selected_title['type'] == "movie":
                     console.print(f"[green]\nMovie select: {selected_title['name']}")
-                    download_film(selected_title['id'], selected_title['slug'], domain)
+                    download_film(selected_title['id'], selected_title['name'], selected_title['year'], domain, session)
                 else:
                     console.print(f"[green]\nTv select: {selected_title['name']}")
-                    download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+                    download_tv(selected_title['id'], selected_title['slug'], selected_title['name'], site_version, domain, session)
             else:
                 console.print("[red]Wrong index for selection")
         elif "[" in index_select:
@@ -68,20 +68,20 @@ def main():
                     selected_title = db_title[n]
                     if selected_title['type'] == "movie":
                         console.print(f"[green]\nMovie select: {selected_title['name']}")
-                        download_film(selected_title['id'], selected_title['slug'], domain)
+                        download_film(selected_title['id'], selected_title['name'], selected_title['year'], domain, session)
                     else:
                         console.print(f"[green]\nTv select: {selected_title['name']}")
-                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+                        download_tv(selected_title['id'], selected_title['slug'], selected_title['name'], site_version, domain, session)
             elif "," in index_select:
                 result = list(map(int, index_select[1:-1].split(',')))
                 for n in result:
                     selected_title = db_title[n]
                     if selected_title['type'] == "movie":
                         console.print(f"[green]\nMovie select: {selected_title['name']}")
-                        download_film(selected_title['id'], selected_title['slug'], domain)
+                        download_film(selected_title['id'], selected_title['name'], selected_title['year'], domain, session)
                     else:
                         console.print(f"[green]\nTv select: {selected_title['name']}")
-                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+                        download_tv(selected_title['id'], selected_title['slug'], selected_title['name'], site_version, domain, session)
             else:
                 console.print("[red]Wrong index for selection")
     else:

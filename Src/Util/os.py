@@ -1,7 +1,11 @@
 # 24.01.24
 
 # Import
-import shutil, os, time
+import shutil, os, time, re
+
+def sanitize_filename(name):
+    """Remove characters invalid in Windows file/folder names"""
+    return re.sub(r'[<>:"/\\|?*]', '', name).strip().rstrip('.')
 
 def remove_folder(folder_path):
     if os.path.exists(folder_path):
