@@ -85,13 +85,17 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_display_name, se
         output_filename=mkv_path
     )
 
-def main_dw_tv(tv_id, tv_slug, tv_display_name, version, domain, session):
+def main_dw_tv(tv_id, tv_slug, tv_display_name, version, domain, session, auto_all=False):
     token = get_token(tv_id, domain, session)
 
     num_season_find = get_info_tv(tv_id, tv_slug, version, domain, session)
-    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of season")
-    console.print(f"\n[blue]Season find: [red]{num_season_find}")
-    season_select = str(msg.ask("\n[green]Insert season number: "))
+
+    if auto_all:
+        season_select = "*"
+    else:
+        console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of season")
+        console.print(f"\n[blue]Season find: [red]{num_season_find}")
+        season_select = str(msg.ask("\n[green]Insert season number: "))
 
     if "[" in season_select:
         start, end = map(int, season_select[1:-1].split('-'))

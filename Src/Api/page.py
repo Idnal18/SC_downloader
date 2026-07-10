@@ -89,3 +89,22 @@ def display_search_results(db_title):
     for i, title in enumerate(db_title):
         year = f" ({title['year']})" if title.get('year') else ""
         console.print(f"[yellow]{i} [white]-> [green]{title['name']}{year} [white]- [cyan]{title['type']}")
+
+def parse_index_selection(index_select, max_len):
+    index_select = index_select.strip()
+    if index_select.isnumeric():
+        n = int(index_select)
+        return [n] if 0 <= n <= max_len - 1 else []
+    if "[" in index_select:
+        inner = index_select.strip("[]")
+        if "-" in inner:
+            start, end = map(int, inner.split('-'))
+            result = list(range(start, end + 1))
+        elif "," in inner:
+            result = list(map(int, inner.split(',')))
+        else:
+            return []
+        if any(n < 0 or n > max_len - 1 for n in result):
+            return []
+        return result
+    return []

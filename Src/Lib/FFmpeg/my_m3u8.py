@@ -268,7 +268,7 @@ class M3U8_Segments:
 
         console.log("[cyan]Start join all file")
         try:
-            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='quiet').run(capture_stdout=True, capture_stderr=True)
+            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='error').run(capture_stdout=True, capture_stderr=True)
         except ffmpeg.Error as e:
             stderr = e.stderr.decode(errors='replace') if e.stderr else str(e)
             console.log(f"[red]Error saving MP4:\n{stderr}")
@@ -319,7 +319,7 @@ class M3U8_Downloader:
                     merged_path,
                     vcodec="copy",
                     acodec="copy",
-                    loglevel='quiet'
+                    loglevel='error'
                 )
                 .global_args('-map', '0:v:0', '-map', '1:a:0', '-shortest', '-strict', 'experimental')
                 .run(capture_stdout=True, capture_stderr=True)
